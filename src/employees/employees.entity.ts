@@ -45,7 +45,7 @@ export class Employees {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => EmployeeLeaves, (employeeLeave) => employeeLeave.user, {
+  @OneToMany(() => EmployeeLeaves, (employeeLeave) => employeeLeave.employee, {
     nullable: true,
   })
   employeeLeaves: EmployeeLeaves[];

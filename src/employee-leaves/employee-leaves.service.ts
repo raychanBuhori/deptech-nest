@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { EmployeeLeaves } from './employee-leaves.entity';
 import { CreateEmployeeLeavesDto } from './dto/create-employee-leaves.dto';
 import { UpdateEmployeeLeavesDto } from './dto/update-employee-leaves.dto';
-import { Users } from '../users/users.entity';
+import { Employees } from '../employees/employees.entity';
 
 @Injectable()
 export class EmployeeLeavesService {
@@ -17,62 +17,38 @@ export class EmployeeLeavesService {
     @InjectRepository(EmployeeLeaves)
     private employeeLeavesRepository: Repository<EmployeeLeaves>,
 
-    @InjectRepository(Users)
-    private usersRepository: Repository<Users>,
+    @InjectRepository(Employees)
+    private employeesRepository: Repository<Employees>,
   ) {}
-
-  async validateLeaveDates(
-    userId: number,
-    leaveStartDate: Date,
-    leaveEndDate: Date,
-  ): Promise<void> {
-    const startMonth = leaveStartDate.getMonth();
-    const startYear = leaveStartDate.getFullYear();
-
-    const existingLeaves = await this.employeeLeavesRepository
-      .createQueryBuilder('employeeLeaves')
-      .where('employeeLeaves.userId = :userId', { userId })
-      .andWhere('MONTH(employeeLeaves.leave_start_date) = :month', {
-        month: startMonth + 1,
-      }) // +1 because MONTH() starts from 1
-      .andWhere('YEAR(employeeLeaves.leave_start_date) = :year', {
-        year: startYear,
-      })
-      .getMany();
-
-    if (existingLeaves.length > 0) {
-      throw new ConflictException(
-        'Leave already exists for this month and year.',
-      );
-    }
-  }
 
   // Create a new leave
   async create(
     createEmployeeLeaveDto: CreateEmployeeLeavesDto,
   ): Promise<EmployeeLeaves> {
-    const user = await this.usersRepository.findOne({
+    const employee = await this.employeesRepository.findOne({
       where: { id: createEmployeeLeaveDto.userId },
     });
-    if (!user) throw new NotFoundException('Users not found');
+    if (!employee) throw new NotFoundException('Users not found');
 
     const employeeLeave = this.employeeLeavesRepository.create({
       ...createEmployeeLeaveDto,
-      user,
+      employee,
     });
     return await this.employeeLeavesRepository.save(employeeLeave);
   }
 
   // Get all leave records
   async findAll(): Promise<EmployeeLeaves[]> {
-    return await this.employeeLeavesRepository.find({ relations: ['user'] });
+    return await this.employeeLeavesRepository.find({
+      relations: ['employee'],
+    });
   }
 
   // Get a single leave record by ID
   async findOne(id: number): Promise<EmployeeLeaves> {
     const employeeLeave = await this.employeeLeavesRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['employee'],
     });
     if (!employeeLeave)
       throw new NotFoundException(`Leave record with ID ${id} not found`);

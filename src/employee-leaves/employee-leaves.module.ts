@@ -3,10 +3,10 @@ import { EmployeeLeavesService } from './employee-leaves.service';
 import { EmployeeLeavesController } from './employee-leaves.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmployeeLeaves } from './employee-leaves.entity';
-import { Users } from 'src/users/users.entity';
+import { Employees } from 'src/employees/employees.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EmployeeLeaves, Users])],
+  imports: [TypeOrmModule.forFeature([EmployeeLeaves, Employees])],
   providers: [EmployeeLeavesService],
   controllers: [EmployeeLeavesController],
 })

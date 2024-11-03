@@ -19,7 +19,7 @@ export class EmployeeLeaves {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
-  user: Employees;
+  employee: Employees;
 
   @Column({ name: 'leave_start_date', type: 'date' })
   leaveStartDate: Date;
